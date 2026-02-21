@@ -145,6 +145,16 @@ If API is hosted elsewhere, set a global base URL before loading `app.js`:
 <script>window.FLEETFLOW_API_BASE = "https://your-api-host.com";</script>
 ```
 
+Or pass it in URL once and it will be saved in localStorage:
+
+```text
+https://<your-user>.github.io/<repo>/?apiBase=https://your-api-host.com
+```
+
+Important for cross-origin requests:
+- Backend `ALLOWED_ORIGINS` must include your GitHub Pages origin
+  example: `https://<your-user>.github.io`
+
 ## Business Logic Endpoints
 
 - `GET /api/dispatch/available`

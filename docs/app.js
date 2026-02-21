@@ -3,10 +3,18 @@ const state = {
   user: JSON.parse(localStorage.getItem("ff_user") || "null"),
 };
 
-const API_BASE_URL =
+const qs = new URLSearchParams(window.location.search);
+const apiBaseFromQuery = qs.get("apiBase");
+if (apiBaseFromQuery) {
+  localStorage.setItem("ff_api_base", apiBaseFromQuery);
+}
+
+const API_BASE_URL = (
   window.FLEETFLOW_API_BASE ||
+  apiBaseFromQuery ||
   localStorage.getItem("ff_api_base") ||
-  "";
+  ""
+).replace(/\/$/, "");
 
 const el = {
   authCard: document.getElementById("authCard"),
@@ -37,6 +45,13 @@ const el = {
 };
 
 async function api(path, options = {}) {
+  const hostedOnGithubPages = window.location.hostname.endsWith("github.io");
+  if (hostedOnGithubPages && !API_BASE_URL) {
+    throw new Error(
+      "API base URL is not configured. Open this page with ?apiBase=https://YOUR_API_HOST or set window.FLEETFLOW_API_BASE."
+    );
+  }
+
   const headers = { "Content-Type": "application/json", ...(options.headers || {}) };
   if (state.token) headers.Authorization = `Bearer ${state.token}`;
 
@@ -45,6 +60,15 @@ async function api(path, options = {}) {
   const data = await res.json().catch(() => ({}));
 
   if (!res.ok) {
+    if (
+      hostedOnGithubPages &&
+      !API_BASE_URL &&
+      (res.status === 404 || res.status === 405)
+    ) {
+      throw new Error(
+        "GitHub Pages is static-only. Configure backend URL with ?apiBase=https://YOUR_API_HOST."
+      );
+    }
     throw new Error(data?.error?.message || `Request failed (${res.status})`);
   }
   return data;
