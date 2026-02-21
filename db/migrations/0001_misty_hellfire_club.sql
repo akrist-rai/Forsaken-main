@@ -1,0 +1,2 @@
+CREATE UNIQUE INDEX IF NOT EXISTS "trips_dispatched_vehicle_unique_idx" ON "trips" USING btree ("vehicle_id") WHERE "trips"."status" = 'dispatched';--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "trips_dispatched_driver_unique_idx" ON "trips" USING btree ("driver_id") WHERE "trips"."status" = 'dispatched';
